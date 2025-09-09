@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>To-Do List App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f6f8fa;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 400px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 24px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    h2 {
+      text-align: center;
+      color: #2d3748;
+    }
+    #new-task-form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    #new-task {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+    }
+    button {
+      padding: 8px 16px;
+      background: #3182ce;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      background: #edf2f7;
+      margin-bottom: 8px;
+      padding: 8px 12px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .completed {
+      text-decoration: line-through;
+      color: #a0aec0;
+    }
+    .delete-btn {
+      background: #e53e3e;
+      border: none;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .checkbox {
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>To-Do List</h2>
+    <form id="new-task-form">
+      <input type="text" id="new-task" placeholder="Add a new task..." required>
+      <button type="submit">Add</button>
+    </form>
+    <ul id="tasks"></ul>
+  </div>
+  <script>
+    const tasksUl = document.getElementById('tasks');
+    const form = document.getElementById('new-task-form');
+    const input = document.getElementById('new-task');
+    let tasks = [];
+
+    // Load tasks from localStorage
+    function loadTasks() {
+      const saved = localStorage.getItem('todo-tasks');
+      tasks = saved ? JSON.parse(saved) : [];
+      renderTasks();
+    }
+
+    // Save tasks to localStorage
+    function saveTasks() {
+      localStorage.setItem('todo-tasks', JSON.stringify(tasks));
+    }
+
+    // Render all tasks
+    function renderTasks() {
+      tasksUl.innerHTML = '';
+      tasks.forEach((task, idx) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <span>
+            <input type="checkbox" class="checkbox" ${task.completed ? 'checked' : ''} data-idx="${idx}">
+            <span class="${task.completed ? 'completed' : ''}">${task.text}</span>
+          </span>
+          <button class="delete-btn" data-idx="${idx}">Delete</button>
+        `;
+        tasksUl.appendChild(li);
+      });
+    }
+
+    // Add new task
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (text) {
+        tasks.push({ text, completed: false });
+        input.value = '';
+        saveTasks();
+        renderTasks();
+      }
+    });
+
+    // Toggle completed & delete event
+    tasksUl.addEventListener('click', e => {
+      if (e.target.classList.contains('delete-btn')) {
+        const idx = e.target.getAttribute('data-idx');
+        tasks.splice(idx, 1);
+        saveTasks();
+        renderTasks();
+      } else if (e.target.classList.contains('checkbox')) {
+        const idx = e.target.getAttribute('data-idx');
+        tasks[idx].completed = e.target.checked;
+        saveTasks();
+        renderTasks();
+      }
+    });
+
+    // Initial load
+    loadTasks();
+  </script>
+</body>
+</html>
